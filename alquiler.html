@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pisos en Alquiler - Best House Santiago</title>
+    <!-- Google Fonts for modern typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  <body>
+    <div id="app">
+      <nav class="main-nav">
+        <div class="nav-container">
+          <a href="/index.html" class="logo">
+            <img src="./img/LOGO_BEST_HOUSE_RECTANGULAR.png" alt="Best House Logo">
+            <div class="logo-text">
+              <span class="logo-title">Santiago de Compostela</span>
+              <span class="logo-address">Gomez Ulla 4-Bajo Santiago de Compostela 15702 (A Coruña)</span>
+            </div>
+          </a>
+          <ul class="nav-links">
+            <li><a href="/index.html">Home</a></li>
+            <li><a href="/venta.html">Venta</a></li>
+            <li><a href="/alquiler.html" class="active">Alquiler</a></li>
+            <li><a href="/promociones.html">Promociones</a></li>
+            <li><a href="/empresa.html">Empresa</a></li>
+            <li><a href="#">Publica tu inmueble</a></li>
+          </ul>
+        </div>
+      </nav>
+
+      <section class="properties-section" style="padding-top: 120px;">
+        <h2>Catálogo Completo: Alquiler</h2>
+        
+        <!-- Filter Bar -->
+        <div class="filters-bar">
+          <strong>Filtros:</strong>
+          
+          <select id="filter-tipo">
+            <option value="">Cualquier Tipo</option>
+            <option value="piso">Piso</option>
+            <option value="casa">Casa</option>
+            <option value="garaje">Garaje</option>
+            <option value="local">Local / Oficina</option>
+          </select>
+
+          <select id="filter-hab">
+            <option value="0">Min. Habitaciones</option>
+            <option value="1">1+ Hab</option>
+            <option value="2">2+ Hab</option>
+            <option value="3">3+ Hab</option>
+            <option value="4">4+ Hab</option>
+          </select>
+
+          <input type="number" id="filter-precio-max" placeholder="Precio Máx. (€)" style="width: 140px;">
+          
+          <select id="filter-orden">
+            <option value="">Ordenar por</option>
+            <option value="asc">Precio: Más baratos primero</option>
+            <option value="desc">Precio: Más caros primero</option>
+          </select>
+
+          <button id="btn-aplicar-filtros" class="btn-primary" style="margin-left: auto;">Aplicar</button>
+        </div>
+
+        <div class="property-grid">
+          <!-- El Javascript inyectará las tarjetas aquí -->
+        </div>
+      </section>
+
+      <!-- Call to Action Banner -->
+      <section class="cta-section">
+        <div class="cta-content glass-panel">
+          <h2>¿Pensando en vender o alquilar tu propiedad?</h2>
+          <p>Confía en el equipo más dinámico de Santiago. Valoramos tu inmueble gratis y con datos reales de mercado.</p>
+          <a href="#" class="btn-primary">Solicitar Valoración Gratuita</a>
+        </div>
+      </section>
+
+      <!-- Google Business Location Section -->
+      <section class="location-section">
+        <div class="location-container glass-panel">
+          <div class="location-info">
+            <h2>Encuéntranos en Santiago</h2>
+            <div class="info-item">
+              <span class="icon">📍</span>
+              <p>Rúa de Gómez Ulla 4-Bajo<br>15702 Santiago de Compostela, A Coruña</p>
+            </div>
+            <div class="info-item">
+              <span class="icon">🕒</span>
+              <p>Lunes - Viernes: 09:30 - 14:00 y 16:30 - 20:00<br>Sábados y Domingos: Cerrado</p>
+            </div>
+            <div class="info-item">
+              <span class="icon">📞</span>
+              <p><a href="tel:881123462">881 123 462</a> | <a href="tel:670242498">670 242 498</a></p>
+            </div>
+            <div class="info-item">
+              <span class="icon">✉️</span>
+              <p><a href="mailto:santiago@best-house.com">santiago@best-house.com</a></p>
+            </div>
+            <div class="google-badge">
+              <span class="icon">🔵</span>
+              <p>Visita nuestro perfil y opina en <strong>Google</strong></p>
+            </div>
+          </div>
+          <div class="location-map">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2924.319522812457!2d-8.55218412351214!3d42.87113497115162!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd2f01525a9df617%3A0xb3a8bbba1089aa13!2sR%C3%BAa%20de%20G%C3%B3mez%20Ulla%2C%204%2C%2015702%20Santiago%20de%20Compostela%2C%20A%20Coru%C3%B1a!5e0!3m2!1ses!2ses!4v1710185000000!5m2!1ses!2ses" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          </div>
+        </div>
+      </section>
+
+      <footer class="main-footer">
+        <div class="footer-content">
+          <div class="footer-col">
+            <h3>Best House Santiago Zona Nueva</h3>
+            <p>Gomez Ulla 4-Bajo<br>Santiago de Compostela 15702 (A Coruña)</p>
+          </div>
+          <div class="footer-col">
+            <h3>Contacto</h3>
+            <p>Email: <a href="mailto:santiago@best-house.com">santiago@best-house.com</a></p>
+            <p>Teléfonos: <a href="tel:881123462">881 123 462</a> - <a href="tel:670242498">670 242 498</a></p>
+          </div>
+          <div class="footer-col">
+            <h3>Legal</h3>
+            <p><a href="#">Política de privacidad</a> | <a href="#">Aviso legal</a></p>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>&copy; 2026 Best House Santiago Zona Nueva. Todos los derechos reservados.</p>
+        </div>
+      </footer>
+
+      <broker-alex></broker-alex>
+    </div>
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>

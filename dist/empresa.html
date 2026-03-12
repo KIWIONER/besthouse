@@ -4,80 +4,64 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pisos en Alquiler - Best House Santiago</title>
+    <title>Sobre Nosotros - Best House Santiago</title>
     <!-- Google Fonts for modern typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <script type="module" crossorigin src="./assets/main-Vn56yrnE.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/main-z2bRbyBq.css">
   </head>
   <body>
     <div id="app">
       <nav class="main-nav">
         <div class="nav-container">
-          <a href="/index.html" class="logo">
-            <img src="./img/LOGO_BEST_HOUSE_RECTANGULAR.png" alt="Best House Logo">
-            <div class="logo-text">
-              <span class="logo-title">Santiago de Compostela</span>
-              <span class="logo-address">Gomez Ulla 4-Bajo Santiago de Compostela 15702 (A Coruña)</span>
-            </div>
-          </a>
+          <div class="logo">Best House Santiago</div>
           <ul class="nav-links">
             <li><a href="/index.html">Home</a></li>
             <li><a href="/venta.html">Venta</a></li>
-            <li><a href="/alquiler.html" class="active">Alquiler</a></li>
+            <li><a href="/alquiler.html">Alquiler</a></li>
             <li><a href="/promociones.html">Promociones</a></li>
-            <li><a href="/empresa.html">Empresa</a></li>
+            <li><a href="/empresa.html" class="active">Empresa</a></li>
             <li><a href="#">Publica tu inmueble</a></li>
           </ul>
         </div>
       </nav>
 
-      <section class="properties-section" style="padding-top: 120px;">
-        <h2>Catálogo Completo: Alquiler</h2>
-        
-        <!-- Filter Bar -->
-        <div class="filters-bar">
-          <strong>Filtros:</strong>
-          
-          <select id="filter-tipo">
-            <option value="">Cualquier Tipo</option>
-            <option value="piso">Piso</option>
-            <option value="casa">Casa</option>
-            <option value="garaje">Garaje</option>
-            <option value="local">Local / Oficina</option>
-          </select>
-
-          <select id="filter-hab">
-            <option value="0">Min. Habitaciones</option>
-            <option value="1">1+ Hab</option>
-            <option value="2">2+ Hab</option>
-            <option value="3">3+ Hab</option>
-            <option value="4">4+ Hab</option>
-          </select>
-
-          <input type="number" id="filter-precio-max" placeholder="Precio Máx. (€)" style="width: 140px;">
-          
-          <select id="filter-orden">
-            <option value="">Ordenar por</option>
-            <option value="asc">Precio: Más baratos primero</option>
-            <option value="desc">Precio: Más caros primero</option>
-          </select>
-
-          <button id="btn-aplicar-filtros" class="btn-primary" style="margin-left: auto;">Aplicar</button>
-        </div>
-
-        <div class="property-grid">
-          <!-- El Javascript inyectará las tarjetas aquí -->
+      <!-- Empresa Section -->
+      <section class="empresa-section" style="padding-top: 120px;">
+        <div class="empresa-container">
+          <div class="text-content">
+            <h2>Nuestra Empresa</h2>
+            <p>Nuestra empresa está formada por un equipo profesional <strong>Joven y Dinámico</strong> con un objetivo común: Satisfacer las demandas de nuestros Clientes.</p>
+            <p>La sociedad tiene por objeto: la Promoción, Compra, Venta y Construcción de toda clase de Bienes Inmuebles Urbanos y Rústicos. Una agencia joven con profesionales expertos y dinámicos.</p>
+            <p>Disponemos de una amplia oferta inmobiliaria de Viviendas Nuevas y 2ª Mano, Chalets y Fincas por toda la provincia, Alquileres y Traspasos, todo ello con las mejores garantías económicas del mercado hasta el 100% de un Crédito e Hipoteca para que usted pueda adquirirlos.</p>
+          </div>
+          <div class="image-content">
+            <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80" alt="Interior acogedor de una casa" class="empresa-img">
+          </div>
         </div>
       </section>
 
-      <!-- Call to Action Banner -->
-      <section class="cta-section">
-        <div class="cta-content glass-panel">
-          <h2>¿Pensando en vender o alquilar tu propiedad?</h2>
-          <p>Confía en el equipo más dinámico de Santiago. Valoramos tu inmueble gratis y con datos reales de mercado.</p>
-          <a href="#" class="btn-primary">Solicitar Valoración Gratuita</a>
+      <!-- Why Choose Us Section -->
+      <section class="features-section">
+        <h2 class="section-title">Nuestras Ventajas Competitivas</h2>
+        <div class="features-grid">
+          <div class="feature-card glass-panel">
+            <div class="feature-icon">💰</div>
+            <h3>Financiación 100%</h3>
+            <p>Conseguimos las mejores condiciones hipotecarias del mercado gracias a nuestros acuerdos bancarios exclusivos.</p>
+          </div>
+          <div class="feature-card glass-panel">
+            <div class="feature-icon">🔍</div>
+            <h3>Cartera Exclusiva</h3>
+            <p>Acceso anticipado a propiedades fuera de mercado (off-market) y oportunidades de inversión altamente rentables.</p>
+          </div>
+          <div class="feature-card glass-panel">
+            <div class="feature-icon">⚖️</div>
+            <h3>Asesoría Integral</h3>
+            <p>Trámites legales, notariales, plusvalías y certificados. Nosotros nos encargamos de toda la burocracia.</p>
+          </div>
         </div>
       </section>
 
@@ -85,7 +69,7 @@
       <section class="location-section">
         <div class="location-container glass-panel">
           <div class="location-info">
-            <h2>Encuéntranos en Santiago</h2>
+            <h2>Nuestra Oficina Institucional</h2>
             <div class="info-item">
               <span class="icon">📍</span>
               <p>Rúa de Gómez Ulla 4-Bajo<br>15702 Santiago de Compostela, A Coruña</p>
@@ -101,10 +85,6 @@
             <div class="info-item">
               <span class="icon">✉️</span>
               <p><a href="mailto:santiago@best-house.com">santiago@best-house.com</a></p>
-            </div>
-            <div class="google-badge">
-              <span class="icon">🔵</span>
-              <p>Visita nuestro perfil y opina en <strong>Google</strong></p>
             </div>
           </div>
           <div class="location-map">
@@ -136,6 +116,5 @@
 
       <broker-alex></broker-alex>
     </div>
-    <script type="module" src="main.js"></script>
   </body>
 </html>

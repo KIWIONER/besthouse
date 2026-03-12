@@ -6,9 +6,9 @@ import { propiedadesVenta } from './propiedades_venta.js';
 
 // --- STUBS DE COMPONENTES ---
 // import './components/NeuralSearch.js';
-// import './components/PropertyCard.js';
-// import './components/LifestyleIndex.js'; 
-// import './components/BrokerAlex.js';
+import './components/PropertyCard.js';
+import './components/LifestyleIndex.js'; 
+import './components/BrokerAlex.js';
 
 // 1. Motor de Renderizado Inmobiliario
 // 1. Motor de Renderizado Inmobiliario

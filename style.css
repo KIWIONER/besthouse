@@ -1349,19 +1349,19 @@ body {
     border-radius: 10px;
 }
 
-.logo-text {
+.sidebar-logo .logo-text {
     display: flex;
     flex-direction: column;
 }
 
-.logo-title {
+.sidebar-logo .logo-title {
     font-size: 1rem;
     font-weight: 700;
     color: white;
     letter-spacing: -0.5px;
 }
 
-.logo-subtitle {
+.sidebar-logo .logo-subtitle {
     font-size: 0.75rem;
     color: rgba(255,255,255,0.5);
     text-transform: uppercase;

@@ -31,7 +31,7 @@ export function sanitizeURL(url) {
   const lower = trimmed.toLowerCase();
   if (
     lower.startsWith('javascript:') ||
-    lower.startsWith('data:') ||
+    (lower.startsWith('data:') && !lower.startsWith('data:image/')) ||
     lower.startsWith('vbscript:')
   ) {
     return '';

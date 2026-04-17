@@ -228,16 +228,14 @@ export const obtenerCitas = async () => {
  */
 export const actualizarEstadoCita = async (id, nuevoEstado) => {
     try {
-        // Para saltarnos el bloqueo CORS (preflight), usamos el formato x-www-form-urlencoded
-        // que el navegador considera "simple" y no lanza la verificación de seguridad previa.
-        const params = new URLSearchParams();
-        params.append('id', id);
-        params.append('estado', nuevoEstado.toUpperCase());
+        // Cambiamos a GET para evitar problemas de CORS/Preflight en el webhook de n8n
+        // Pasamos los parámetros directamente en la URL
+        const url = new URL('https://cerebro.agencialquimia.com/webhook/actualizar-estado-cita');
+        url.searchParams.append('id', id);
+        url.searchParams.append('estado', nuevoEstado.toUpperCase());
 
-        const response = await fetch('https://cerebro.agencialquimia.com/webhook/actualizar-estado-cita', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: params
+        const response = await fetch(url.toString(), {
+            method: 'GET'
         });
         
         if (!response.ok) throw new Error('Error al actualizar la cita');
@@ -260,31 +258,45 @@ export const getPublicUrl = (pathOrUrl) => {
     if (!pathOrUrl || typeof pathOrUrl !== 'string') return '';
     
     let path = pathOrUrl.trim();
+
+    // 1. Si es Base64 (data:image/...) devolver tal cual
+    if (path.startsWith('data:')) return path;
+
+    // 2. Si contiene comas (lista), tomar la primera
+    if (path.includes(',')) {
+        path = path.split(',')[0].trim();
+    }
     
-    // Si ya es una URL completa de Supabase, intentamos normalizarla por si viene corrupta
+    // 3. Limpieza de caracteres de escape de JSON mal parseado
+    path = path.replace(/[\[\]"]/g, '').trim();
+
+    // 4. Si ya es una URL de nuestro Supabase, normalizamos el bucket y la carpeta
     if (path.includes('ybqzcxabblyzqhezanaf.supabase.co')) {
-        // En lugar de hacer pop() y perder carpetas intermedias,
-        // extraemos todo lo que viene después de /public/inmuebles/ o /object/inmuebles/
-        const parts = path.split(/\/public\/inmuebles\/|\/object\/inmuebles\//);
-        if (parts.length > 1) {
-            path = parts[1].split('?')[0]; // Quitamos posibles query params de firmas
-        } else {
-            return path; // Ya parece ser una URL pública directa
+        // Asegurarnos de que usa el formato /public/inmuebles/imagenes/...
+        if (!path.includes('/public/inmuebles/imagenes/')) {
+             // Caso A: Tiene el bucket correcto pero falta la carpeta imagenes/
+             if (path.includes('/public/inmuebles/') && !path.includes('/public/inmuebles/imagenes/')) {
+                 path = path.replace('/public/inmuebles/', '/public/inmuebles/imagenes/');
+             }
+             // Caso B: Viene de un bucket antiguo 'imagenes/' directamente
+             else if (path.includes('/public/imagenes/')) {
+                 path = path.replace('/public/imagenes/', '/public/inmuebles/imagenes/');
+             }
         }
+        return path;
     }
 
-    // Si empieza por http, la devolvemos tal cual (Unsplash u otros)
+    // 5. Si es una URL externa (http), devolver tal cual
     if (path.startsWith('http')) return path;
 
-    // Si es una ruta relativa (ej: "imagenes/foto.jpg" o "foto.jpg")
-    // nos aseguramos de no duplicar "imagenes/" si ya lo trae
-    let cleanPath = path;
-    if (cleanPath.startsWith('inmuebles/')) cleanPath = cleanPath.replace('inmuebles/', '');
+    // 6. Si es una ruta relativa, asegurar que termina siendo /public/inmuebles/imagenes/...
+    // Quitamos 'inmuebles/' si ya lo trae para no duplicar
+    if (path.startsWith('inmuebles/')) path = path.replace('inmuebles/', '');
     
-    // IMPORTANTE: El bucket es 'inmuebles', pero la carpeta suele ser 'imagenes/'
-    // Si la ruta no trae 'imagenes/', la añadimos solo si sospechamos que falta,
-    // pero por ahora lo más seguro es usar el path tal cual viene si es relativo.
-    return `${SUPABASE_URL}/storage/v1/object/public/inmuebles/${cleanPath}`;
+    // Aseguramos que tenga el prefijo imagenes/ dentro del bucket
+    if (!path.startsWith('imagenes/')) path = `imagenes/${path}`;
+    
+    return `${SUPABASE_URL}/storage/v1/object/public/inmuebles/${path}`;
 };
 
 /**

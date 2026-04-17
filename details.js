@@ -73,9 +73,18 @@ function renderData(prop) {
     const precioVal = prop.precio || 0;
     const esAlquiler = prop.operacion === 'alquiler' || prop.unidad_precio === 'mes';
 
-    // Breadcrumbs
-    document.getElementById('breadcrumb-op').textContent = esAlquiler ? 'Alquiler' : 'Venta';
-    document.getElementById('breadcrumb-loc').textContent = municipio;
+    // Breadcrumbs funcionales
+    const breadOp = document.getElementById('breadcrumb-op');
+    const breadLoc = document.getElementById('breadcrumb-loc');
+    
+    if (breadOp) {
+        breadOp.textContent = esAlquiler ? 'Alquiler' : 'Venta';
+        breadOp.href = esAlquiler ? '/alquiler.html' : '/venta.html';
+    }
+    if (breadLoc) {
+        breadLoc.textContent = municipio;
+        breadLoc.href = `/index.html?search=${encodeURIComponent(municipio)}`;
+    }
 
     // Header
     document.getElementById('prop-title').textContent = titulo;
@@ -85,9 +94,49 @@ function renderData(prop) {
     document.getElementById('prop-ref').textContent = escapeHTML(prop.referencia);
     document.getElementById('prop-type-badge').textContent = (prop.tipo || 'Inmueble').toUpperCase();
 
-    // Imagen
-    if (prop.imagen) {
-        document.getElementById('main-img').src = sanitizeURL(getPublicUrl(prop.imagen));
+    // Imágenes y Galería Bento
+    const rawImg = prop.imagen_url || prop.imagen;
+    if (rawImg) {
+        const images = rawImg.split(',').map(url => url.trim()).filter(Boolean);
+        const container = document.getElementById('gallery-container');
+        
+        // Actualizar Fotos Reales
+        if (images[0]) document.getElementById('main-img').src = sanitizeURL(getPublicUrl(images[0]));
+        
+        const img2 = document.getElementById('img-2');
+        if (img2) {
+            if (images[1]) {
+                img2.src = sanitizeURL(getPublicUrl(images[1]));
+                img2.style.display = 'block';
+            } else {
+                img2.style.display = 'none';
+            }
+        }
+        
+        const img3 = document.getElementById('img-3');
+        if (img3) {
+            if (images[2]) {
+                img3.src = sanitizeURL(getPublicUrl(images[2]));
+                img3.style.display = 'block';
+            } else {
+                img3.style.display = 'none';
+            }
+        }
+
+        // Ajuste dinámico del Bento según cantidad de fotos
+        if (images.length === 1) {
+            container.style.gridTemplateColumns = '1fr';
+            container.style.gridTemplateRows = '500px';
+        } else if (images.length === 2) {
+            container.style.gridTemplateColumns = '1fr 1fr';
+            container.style.gridTemplateRows = '400px';
+            if (images[0]) document.getElementById('main-img').style.gridRow = 'span 1';
+        } else {
+            // Layout original para 3+ fotos
+            container.style.gridTemplateColumns = '2fr 1fr';
+            container.style.gridTemplateRows = '250px 250px';
+            document.getElementById('main-img').style.gridRow = 'span 2';
+        }
     }
 
     // Certificado Energético (Simulado si no existe)
@@ -169,7 +218,7 @@ function renderRecommendations(current, catalogo) {
     recGrid.innerHTML = similares.map(p => `
         <a href="detalle.html?ref=${p.referencia}" class="glass-panel property-card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column; text-decoration: none;">
             <div style="height: 180px;">
-                <img src="${sanitizeURL(getPublicUrl(p.imagen)) || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=400&q=80'}" style="width: 100%; height: 100%; object-fit: cover;">
+                <img src="${sanitizeURL(getPublicUrl(p.imagen_url || p.imagen)) || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=400&q=80'}" style="width: 100%; height: 100%; object-fit: cover;">
             </div>
             <div style="padding: 1rem;">
                 <h4 style="color: var(--brand-blue); margin: 0;">${p.precio ? p.precio.toLocaleString() + ' €' : 'Consultar'}</h4>

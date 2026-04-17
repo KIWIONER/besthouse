@@ -1,4 +1,4 @@
-import { obtenerInmueblesAN8N, eliminarInmuebleDirecto } from '../services/api.js';
+import { obtenerInmueblesAN8N, eliminarInmuebleDirecto, getPublicUrl } from '../services/api.js';
 import { escapeHTML, sanitizeURL } from '../services/sanitize.js';
 
 class InventoryList extends HTMLElement {
@@ -300,27 +300,54 @@ class InventoryList extends HTMLElement {
         .badge-op.venta { background: #dcfce7; color: #166534; }
         .badge-op.alquiler { background: #dbeafe; color: #1e40af; }
 
-        .btn-edit {
+        .btn-action {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 6px 12px;
+          border-radius: 8px;
+          font-size: 0.75rem;
           font-weight: 700;
-          color: #000155;
           text-decoration: none;
-          font-size: 0.8rem;
-          margin-right: 1rem;
+          transition: all 0.2s;
+          border: 1px solid transparent;
+          cursor: pointer;
+        }
+
+        .btn-edit {
+          background: #f0f7ff;
+          color: #000155;
+          border-color: #dbeafe;
+        }
+        .btn-edit:hover {
+          background: #dbeafe;
+          transform: translateY(-1px);
         }
 
         .btn-delete {
-          font-weight: 700;
+          background: #fef2f2;
           color: #ef4444;
-          text-decoration: none;
-          font-size: 0.8rem;
-          cursor: pointer;
-          background: none;
-          border: none;
-          padding: 0;
+          border-color: #fee2e2;
+        }
+        .btn-delete:hover {
+          background: #fee2e2;
+          transform: translateY(-1px);
         }
 
-        .btn-delete:hover {
-          color: #dc2626;
+        .actions-container {
+          display: flex;
+          justify-content: flex-end;
+          gap: 8px;
+        }
+
+        /* Fila destacada */
+        tr.row-destacada td {
+          background: #fffdf5;
+          border-top-color: #fef3c7;
+          border-bottom-color: #fef3c7;
+        }
+        tr.row-destacada td:first-child {
+          border-left: 3px solid #fbbf24;
         }
 
         .loading-overlay { padding: 4rem; text-align: center; color: #94a3b8; font-weight: 600; }
@@ -333,10 +360,34 @@ class InventoryList extends HTMLElement {
           background: #f8fafc;
           border: 1px solid #e2e8f0;
           border-radius: 10px;
-          padding: 0 1rem;
-          height: 42px;
-          width: 350px;
+          padding: 0 0.5rem 0 1rem;
+          height: 44px;
+          width: 420px;
           transition: all 0.2s ease;
+        }
+
+        .btn-search {
+          background: #000155;
+          color: white;
+          border: none;
+          border-radius: 8px;
+          padding: 6px 16px;
+          font-size: 0.8rem;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .btn-search:hover {
+          background: #000082;
+          box-shadow: 0 2px 8px rgba(0, 1, 85, 0.2);
+        }
+
+        .results-info {
+          font-size: 0.75rem;
+          color: #94a3b8;
+          font-weight: 600;
+          margin-left: 1rem;
         }
 
         .search-bar-inline:focus-within {
@@ -395,9 +446,13 @@ class InventoryList extends HTMLElement {
       <!-- Section: Inventory Table -->
       <div class="inventory-wrapper">
         <div class="table-header">
-          <div class="search-bar-inline">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            <input type="text" id="inlineSearch" placeholder="Filtrar por REF, título o zona..." value="${this.searchTerm}">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <div class="search-bar-inline">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <input type="text" id="inlineSearch" placeholder="Filtrar por REF, título o zona..." value="${this.searchTerm}">
+              <button class="btn-search" id="searchBtn">Buscar</button>
+            </div>
+            <span class="results-info">Encontrados: <strong>${this.properties.length}</strong></span>
           </div>
 
           ${this.selectedRefs.length > 0 ? `
@@ -441,16 +496,11 @@ class InventoryList extends HTMLElement {
                 const operacion = (prop.operacion || 'venta').toLowerCase();
                 const precio = prop.precio ? prop.precio.toLocaleString('es-ES') : '---';
                 
-                // Fallback para imagen
-                let rawImg = prop.imagen_url || prop.imagen;
-                if (typeof rawImg === 'string' && rawImg.includes(',')) rawImg = rawImg.split(',')[0];
-                if (typeof rawImg === 'string') rawImg = rawImg.replace(/[\[\]"]/g, '').trim();
-                const imagenUrl = rawImg && String(rawImg).length > 10 
-                  ? rawImg 
-                  : 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=200&q=80';
+                const imagenUrl = sanitizeURL(getPublicUrl(prop.imagen_url || prop.imagen)) || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=200&q=80';
+                const isDestacado = !!prop.destacado;
 
                 return `
-                  <tr class="${isSelected ? 'selected-row' : ''}">
+                  <tr class="${isSelected ? 'selected-row' : ''} ${isDestacado ? 'row-destacada' : ''}">
                     <td class="checkbox-cell">
                       <input type="checkbox" class="custom-checkbox row-checkbox" data-ref="${prop.referencia}" ${isSelected ? 'checked' : ''}>
                     </td>
@@ -458,7 +508,7 @@ class InventoryList extends HTMLElement {
                       <div style="display: flex; align-items: center; gap: 1rem;">
                         <img src="${imagenUrl}" class="prop-img" alt="${titulo}">
                         <div>
-                          <span class="ref-code">#${ref}</span>
+                          <span class="ref-code">${isDestacado ? '⭐ ' : ''}#${ref}</span>
                           <span class="address">${titulo}</span>
                           <span class="city">${municipio}${barrio ? ', ' + barrio : ''}</span>
                         </div>
@@ -466,9 +516,17 @@ class InventoryList extends HTMLElement {
                     </td>
                     <td><span class="badge-op ${operacion}">${operacion}</span></td>
                     <td><span class="price-tag">${precio}${operacion === 'alquiler' ? '/mes' : '€'}</span></td>
-                    <td style="text-align: right;">
-                      <a href="#" class="btn-edit" data-ref="${ref}">Editar</a>
-                      <button type="button" class="btn-delete" data-ref="${ref}">Borrar</button>
+                    <td>
+                      <div class="actions-container">
+                        <a href="#" class="btn-action btn-edit" data-ref="${ref}">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                          Editar
+                        </a>
+                        <button type="button" class="btn-action btn-delete" data-ref="${ref}">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                          Borrar
+                        </button>
+                      </div>
                     </td>
                   </tr>`;
               }).join('')}
@@ -485,11 +543,22 @@ class InventoryList extends HTMLElement {
     const shadow = this.shadowRoot;
     
     // Filtro de búsqueda
+    // Lógica de búsqueda manual
     const searchInput = shadow.getElementById('inlineSearch');
-    if (searchInput) {
-      searchInput.addEventListener('input', (e) => {
-        this.searchTerm = e.target.value;
+    const searchBtn = shadow.getElementById('searchBtn');
+    
+    if (searchBtn && searchInput) {
+      const perfomSearch = () => {
+        this.searchTerm = searchInput.value;
         this.applyFilter();
+      };
+
+      searchBtn.addEventListener('click', perfomSearch);
+      
+      searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          perfomSearch();
+        }
       });
     }
 

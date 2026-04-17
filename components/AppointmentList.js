@@ -138,151 +138,151 @@ class AppointmentList extends HTMLElement {
           color: white;
         }
 
-        /* CRM Grid & Staggered Animation */
-        .crm-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-          gap: 1.5rem;
-        }
-
-        .client-card {
+        /* CRM Tickets Table - Modern Layout */
+        .tickets-container {
           background: white;
-          border-radius: 24px;
-          padding: 1.75rem;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+          border-radius: 20px;
           border: 1px solid rgba(226, 232, 240, 0.8);
-          transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
-          display: flex;
-          flex-direction: column;
-          gap: 1.25rem;
-          position: relative;
           overflow: hidden;
-          opacity: 0;
-          transform: translateY(20px);
-          animation: slideUp 0.5s ease-out forwards;
-        }
-        
-        .client-card:hover {
-          transform: translateY(-8px) scale(1.02);
-          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
-          border-color: var(--accent);
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
 
-        .client-card::before {
-          content: '';
-          position: absolute;
-          top: 0; left: 0; width: 4px; height: 100%;
-          background: var(--status-color, var(--accent));
-          border-radius: 0 4px 4px 0;
+        .appointments-table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 0.9rem;
+          text-align: left;
         }
 
-        .card-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
+        .appointments-table th {
+          background: #f8fafc;
+          padding: 16px 20px;
+          font-weight: 700;
+          color: #64748b;
+          font-size: 0.75rem;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          border-bottom: 1px solid #e2e8f0;
         }
-        
-        .client-info {
+
+        .ticket-row {
+          border-bottom: 1px solid #f1f5f9;
+          transition: all 0.2s ease;
+          animation: slideIn 0.4s ease-out forwards;
+        }
+
+        .ticket-row:hover {
+          background: #f8fafc;
+          transform: scale(1.002);
+        }
+
+        .ticket-row:last-child { border-bottom: none; }
+
+        .appointments-table td {
+          padding: 16px 20px;
+          vertical-align: middle;
+        }
+
+        /* Column contents */
+        .prop-ref-badge {
+          font-size: 0.7rem;
+          background: #ffda2a;
+          color: #000;
+          padding: 4px 8px;
+          border-radius: 6px;
+          font-weight: 800;
+          display: inline-block;
+        }
+
+        .client-cell {
           display: flex;
           align-items: center;
           gap: 12px;
         }
-        
-        .avatar-ui {
-          width: 42px;
-          height: 42px;
+
+        .client-avatar {
+          width: 32px;
+          height: 32px;
           background: #f1f5f9;
-          border-radius: 14px;
+          border-radius: 10px;
           display: flex;
           align-items: center;
           justify-content: center;
           color: var(--accent);
         }
 
-        .client-name {
-          font-size: 1.15rem;
-          font-weight: 800;
-          color: #0f172a;
+        .client-info h4 {
           margin: 0;
-          letter-spacing: -0.2px;
+          font-size: 0.95rem;
+          font-weight: 700;
+          color: #0f172a;
         }
 
-        .prop-ref {
-          font-size: 0.65rem;
-          background: #ffda2a;
-          color: #000;
-          padding: 4px 10px;
-          border-radius: 8px;
-          font-weight: 800;
-          text-transform: uppercase;
+        .contact-actions {
+          display: flex;
+          gap: 8px;
         }
 
-        .contact-grid {
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: 0.75rem;
-        }
-        .contact-item {
+        .action-icon-btn {
+          width: 34px;
+          height: 34px;
           display: flex;
           align-items: center;
-          gap: 12px;
-          font-size: 0.85rem;
+          justify-content: center;
+          border-radius: 10px;
+          background: #f1f5f9;
           color: #64748b;
           text-decoration: none;
-          padding: 8px 12px;
-          background: #f8fafc;
-          border-radius: 12px;
           transition: all 0.2s;
-          font-weight: 600;
         }
-        .contact-item:hover { 
-          color: var(--accent); 
-          background: #f1f5f9;
-        }
-        .contact-item svg { color: #94a3b8; }
 
-        .time-badge {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 10px 14px;
-          background: rgba(241, 245, 249, 0.5);
-          border-radius: 14px;
-          font-size: 0.8rem;
+        .action-icon-btn:hover {
+          background: var(--accent);
+          color: white;
+        }
+
+        .date-time-cell {
+          white-space: nowrap;
+        }
+
+        .date-text {
           font-weight: 700;
-          color: #475569;
-        }
-        .time-badge .icon-text {
-          display: flex;
-          align-items: center;
-          gap: 6px;
+          color: #1e293b;
+          display: block;
         }
 
-        /* Dropdown Stylized */
-        .status-box {
-          position: relative;
-          margin-top: 0.5rem;
+        .time-text {
+          font-size: 0.75rem;
+          color: #94a3b8;
         }
-        .status-dropdown {
+
+        /* Dropdown customizado para fila */
+        .status-select-wrapper {
+          position: relative;
+          min-width: 150px;
+        }
+
+        .row-status-dropdown {
           width: 100%;
-          padding: 12px 16px;
-          border-radius: 14px;
-          border: 2px solid #f1f5f9;
+          padding: 8px 12px;
+          border-radius: 10px;
+          border: 1px solid #e2e8f0;
           font-family: inherit;
-          font-size: 0.85rem;
+          font-size: 0.8rem;
           font-weight: 700;
           color: #1e293b;
           background: #fff;
           cursor: pointer;
-          outline: none;
-          transition: all 0.2s;
           appearance: none;
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
           background-repeat: no-repeat;
-          background-position: right 16px center;
+          background-position: right 10px center;
         }
-        .status-dropdown:focus { border-color: var(--accent); }
-        .status-dropdown:hover { border-color: #e2e8f0; }
+
+        .row-status-dropdown:focus {
+          border-color: var(--accent);
+          outline: none;
+        }
 
         .loading, .error, .empty {
           padding: 80px 20px;
@@ -291,18 +291,10 @@ class AppointmentList extends HTMLElement {
           font-weight: 600;
         }
 
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(30px); }
-          to { opacity: 1; transform: translateY(0); }
+        @keyframes slideIn {
+          from { opacity: 0; transform: translateX(-10px); }
+          to { opacity: 1; transform: translateX(0); }
         }
-
-        /* Staggered load offsets */
-        .client-card:nth-child(1) { animation-delay: 0.05s; }
-        .client-card:nth-child(2) { animation-delay: 0.1s; }
-        .client-card:nth-child(3) { animation-delay: 0.15s; }
-        .client-card:nth-child(4) { animation-delay: 0.2s; }
-        .client-card:nth-child(5) { animation-delay: 0.25s; }
-        .client-card:nth-child(6) { animation-delay: 0.3s; }
       </style>
 
       <div class="container">
@@ -318,17 +310,30 @@ class AppointmentList extends HTMLElement {
 
         <!-- content -->
         ${this.isLoading ? `
-          <div class="loading">Iniciando motor de gestión...</div>
+          <div class="loading">Sincronizando Leads...</div>
         ` : errorMessage ? `
-          <div class="error">⚠️ Sistema temporalmente fuera de servicio: ${errorMessage}</div>
+          <div class="error">⚠️ Error de conexión: ${errorMessage}</div>
         ` : filteredAppointments.length === 0 ? `
           <div class="empty">
             <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;">📂</div>
-            <p>Bandeja vacía en <strong>${this.states.find(s => s.id === this.activeTab).label}</strong></p>
+            <p>No hay tickets en la bandeja de <strong>${this.states.find(s => s.id === this.activeTab).label}</strong></p>
           </div>
         ` : `
-          <div class="crm-grid">
-            ${filteredAppointments.map(a => this.renderCard(a)).join('')}
+          <div class="tickets-container">
+            <table class="appointments-table">
+              <thead>
+                <tr>
+                  <th>Referencia</th>
+                  <th>Cliente</th>
+                  <th>Contacto</th>
+                  <th>Cita / Horario</th>
+                  <th>Estado del Ticket</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${filteredAppointments.map(a => this.renderRow(a)).join('')}
+              </tbody>
+            </table>
           </div>
         `}
       </div>
@@ -337,47 +342,53 @@ class AppointmentList extends HTMLElement {
     this.setupEventListeners();
   }
 
-  renderCard(a) {
+  renderRow(a) {
     const id = a.id || '';
     const nombre = escapeHTML(a.nombre || 'Interesado');
     const tel = escapeHTML(a.telefono || '');
     const email = escapeHTML(a.email || '');
     const ref = escapeHTML(a.referencia_inmueble || 'General');
-    const fecha = a.fecha ? new Date(a.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }) : '--';
+    const fecha = a.fecha ? new Date(a.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }) : '--';
     const franja = escapeHTML(a.franja || '');
+    const hora = a.hora ? a.hora.substring(0, 5) : '';
     const currentStatus = (a.estado || 'PENDIENTE').toUpperCase();
-    const stateConfig = this.states.find(s => s.id === currentStatus) || this.states[0];
-
+    
     return `
-      <div class="client-card" style="--status-color: ${stateConfig.color}">
-        <div class="card-header">
-          <div class="client-info">
-            <div class="avatar-ui">${ICONS.user}</div>
-            <h3 class="client-name">${nombre}</h3>
+      <tr class="ticket-row">
+        <td><span class="prop-ref-badge">PROP ${ref}</span></td>
+        <td>
+          <div class="client-cell">
+            <div class="client-avatar">${ICONS.user}</div>
+            <div class="client-info">
+              <h4>${nombre}</h4>
+            </div>
           </div>
-          <span class="prop-ref">PROP ${ref}</span>
-        </div>
-
-        <div class="contact-grid">
-          <a href="tel:${tel}" class="contact-item">${ICONS.phone} ${tel}</a>
-          <a href="mailto:${email}" class="contact-item">${ICONS.mail} ${email}</a>
-        </div>
-
-        <div class="time-badge">
-          <div class="icon-text">${ICONS.calendar} ${fecha}</div>
-          <div class="icon-text">${ICONS.clock} ${franja}</div>
-        </div>
-
-        <div class="status-box">
-          <select class="status-dropdown" data-id="${id}">
-            ${this.states.map(s => `
-              <option value="${s.id}" ${currentStatus === s.id ? 'selected' : ''}>
-                ${s.label}
-              </option>
-            `).join('')}
-          </select>
-        </div>
-      </div>
+        </td>
+        <td>
+          <div class="contact-actions">
+            ${tel ? `<a href="tel:${tel}" class="action-icon-btn" title="Llamar">${ICONS.phone}</a>` : ''}
+            ${email ? `<a href="mailto:${email}" class="action-icon-btn" title="Email">${ICONS.mail}</a>` : ''}
+            ${tel ? `<a href="https://wa.me/34${tel.replace(/\s+/g, '')}" class="action-icon-btn" style="color: #25d366" title="WhatsApp"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/></svg></a>` : ''}
+          </div>
+        </td>
+        <td>
+          <div class="date-time-cell">
+            <span class="date-text">${fecha}</span>
+            <span class="time-text">${hora ? `<strong>${hora}h</strong>` : franja}</span>
+          </div>
+        </td>
+        <td>
+          <div class="status-select-wrapper">
+            <select class="status-dropdown row-status-dropdown" data-id="${id}">
+              ${this.states.map(s => `
+                <option value="${s.id}" ${currentStatus === s.id ? 'selected' : ''}>
+                  ${s.label}
+                </option>
+              `).join('')}
+            </select>
+          </div>
+        </td>
+      </tr>
     `;
   }
 

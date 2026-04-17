@@ -61,18 +61,7 @@ export function renderProperties(filtro = 'todos', dataset = null, limit = null)
   }
 
   propiedades.forEach(prop => {
-    // Sanitize all external data before inserting into HTML
-    // Manejo de galería: tomamos solo la primera imagen para la tarjeta
     let rawImg = prop.imagen_url || prop.imagen;
-    
-    // Limpieza defensiva
-    if (typeof rawImg === 'string') {
-      rawImg = rawImg.replace(/[\[\]"]/g, '').trim();
-      if (rawImg.includes(',')) {
-        rawImg = rawImg.split(',')[0].trim();
-      }
-    }
-
     const imagenUrl = sanitizeURL(getPublicUrl(rawImg)) || "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80";
     const titulo = escapeHTML(prop.titulo);
     const referencia = escapeHTML(prop.referencia);
@@ -190,9 +179,10 @@ async function init() {
           
           let resultados = datasetBase;
 
-          // Filter by city/zone
+          // Filter by city/zone or reference
           if (zona) {
              resultados = resultados.filter(p => 
+                 (p.referencia && p.referencia.toLowerCase().includes(zona)) ||
                  (p.municipio && p.municipio.toLowerCase().includes(zona)) ||
                  (p.barrio && p.barrio.toLowerCase().includes(zona)) ||
                  (p.provincia && p.provincia.toLowerCase().includes(zona))

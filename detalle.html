@@ -10,13 +10,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
+      .detail-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem 2rem 4rem;
+      }
+
       .detail-layout {
         display: grid;
         grid-template-columns: 1fr 380px;
         gap: 3rem;
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 120px 2rem 4rem;
       }
 
       .gallery-bento {
@@ -131,34 +134,35 @@
         <div style="max-width: 1400px; margin: 0 auto; padding: 1rem 2rem;">
           <nav style="font-size: 0.9rem; color: #64748b;">
             <a href="/index.html" style="text-decoration: none; color: inherit;">Home</a> &gt; 
-            <span id="breadcrumb-op">Cargando</span> &gt; 
-            <span id="breadcrumb-loc" style="color: var(--brand-blue); font-weight: 600;">...</span>
+            <a id="breadcrumb-op" style="text-decoration: none; color: inherit;">Cargando</a> &gt; 
+            <a id="breadcrumb-loc" style="text-decoration: none; color: var(--brand-blue); font-weight: 600;">...</a>
           </nav>
         </div>
       </div>
 
-      <main class="detail-layout" style="padding-top: 2rem;">
-        <div class="main-content">
-          <div id="property-header">
-            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-              <span id="prop-type-badge" style="background: var(--accent-amber); color: #000; padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 0.8rem; display: inline-block;">...</span>
-              <div id="energy-rating-container">
-                <!-- Energy badge loaded by JS -->
-              </div>
+      <main class="detail-container">
+        <div id="property-header">
+          <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+            <span id="prop-type-badge" style="background: var(--accent-amber); color: #000; padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 0.8rem; display: inline-block;">...</span>
+            <div id="energy-rating-container">
+              <!-- Energy badge loaded by JS -->
             </div>
-            <h1 id="prop-title" style="font-size: 2.5rem; margin-bottom: 0.5rem; color: var(--text-slate);">Cargando...</h1>
-            <p id="prop-location" style="color: #64748b; font-size: 1.1rem; margin-bottom: 2rem;">...</p>
           </div>
+          <h1 id="prop-title" style="font-size: 2.5rem; margin-bottom: 0.5rem; color: var(--text-slate);">Cargando...</h1>
+          <p id="prop-location" style="color: #64748b; font-size: 1.1rem; margin-bottom: 2rem;">...</p>
+        </div>
 
-          <div class="gallery-bento" id="gallery-container">
-            <img id="main-img" src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80" class="gallery-item main-photo" alt="Foto principal">
-            <img src="https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=800&q=80" class="gallery-item" alt="Interiores">
-            <img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80" class="gallery-item" alt="Vistas">
-          </div>
+        <div class="detail-layout">
+          <div class="main-content">
+            <div class="gallery-bento" id="gallery-container">
+              <img id="main-img" src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80" class="gallery-item main-photo" alt="Foto principal">
+              <img id="img-2" src="https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=800&q=80" class="gallery-item" alt="Interiores">
+              <img id="img-3" src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80" class="gallery-item" alt="Vistas">
+            </div>
 
-          <div class="specs-grid" id="specs-grid">
-            <!-- Cargado por JS -->
-          </div>
+            <div class="specs-grid" id="specs-grid">
+              <!-- Cargado por JS -->
+            </div>
 
           <div class="glass-panel" style="margin-bottom: 3rem;">
             <h2 style="margin-bottom: 1.5rem; color: var(--brand-blue);">Descripción completa</h2>
@@ -207,7 +211,6 @@
             <broker-alex mode="inline" id="sidebar-alex"></broker-alex>
 
             <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.8rem;">
-              <a id="whatsapp-btn" href="https://wa.me/34881123462" class="btn-card-secondary" style="text-align: center; padding: 1rem; background: #25d366; color: white !important; border: none; font-weight: 700;">Contactar por WhatsApp</a>
             </div>
           </div>
         </aside>

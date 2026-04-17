@@ -1,4 +1,5 @@
 import { crearInmuebleAN8N, actualizarImagenInmuebleDirecto, subirImagenViaWebhook, getPublicUrl } from '../services/api.js';
+import { sanitizeURL } from '../services/sanitize.js';
 
 class PropertyForm extends HTMLElement {
   constructor() {
@@ -78,9 +79,6 @@ class PropertyForm extends HTMLElement {
         
         this.galleryImages = rawUrls.map(u => {
           u = String(u).replace(/[\[\]"]/g, '').trim();
-          // Ignorar Base64 corruptos
-          if (u.startsWith('data:') && u.length > 5000) return null;
-          
           return getPublicUrl(u);
         }).filter(u => u !== null && u !== '');
 
@@ -540,7 +538,8 @@ class PropertyForm extends HTMLElement {
       const val = e.target.value.trim();
       if (val) {
         const urls = val.includes(',') ? val.split(',') : [val];
-        this.galleryImages = [...this.galleryImages, ...urls.map(u => u.trim())];
+        const normalizedUrls = urls.map(u => getPublicUrl(u.trim())).filter(u => u);
+        this.galleryImages = [...this.galleryImages, ...normalizedUrls];
         dataField.value = this.galleryImages.join(',');
         this.refreshGallery();
         e.target.value = ''; // Limpiar para permitir añadir más
@@ -590,8 +589,9 @@ class PropertyForm extends HTMLElement {
         const publicUrl = await subirImagenViaWebhook(this.editRef, base64Data, file.name);
 
         if (publicUrl) {
-          console.log(`[PropertyForm] ✅ URL recibida: ${publicUrl}`);
-          this.galleryImages.push(publicUrl);
+          const normalized = getPublicUrl(publicUrl);
+          console.log(`[PropertyForm] ✅ URL recibida y normalizada: ${normalized}`);
+          this.galleryImages.push(normalized);
         }
       }
 
@@ -635,7 +635,7 @@ class PropertyForm extends HTMLElement {
     
     grid.innerHTML = this.galleryImages.map((url, index) => `
       <div class="gallery-item ${index === 0 ? 'main-item' : ''}" data-index="${index}" title="Haz clic para hacerla principal">
-        <img src="${url}" 
+        <img src="${sanitizeURL(url)}" 
              alt="Foto ${index + 1}" 
              loading="lazy"
              onerror="this.src='https://images.unsplash.com/photo-1594322436404-5a0526db4d13?q=80&w=200&auto=format&fit=crop';">

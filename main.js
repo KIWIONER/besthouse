@@ -3,6 +3,10 @@ console.log('Midnight Gold Engine Initialized');
 
 import { soloDisponibles, propiedadesAlquiler } from './propiedades_alquiler.js';
 import { propiedadesVenta } from './propiedades_venta.js';
+import { enviarAN8N, obtenerInmueblesAN8N, getPublicUrl } from './services/api.js';
+import { escapeHTML, sanitizeURL } from './services/sanitize.js';
+
+let catalogoReal = []; // Para almacenar datos de Supabase
 
 // --- STUBS DE COMPONENTES ---
 // import './components/NeuralSearch.js';
@@ -12,52 +16,90 @@ import './components/BrokerAlex.js';
 
 // 1. Motor de Renderizado Inmobiliario
 // 1. Motor de Renderizado Inmobiliario
-export function renderProperties(filtro = 'todos', dataset = propiedadesAlquiler, limit = null) {
+export function renderProperties(filtro = 'todos', dataset = null, limit = null) {
   const grid = document.querySelector('.property-grid');
   if (!grid) return;
   
-  grid.innerHTML = ''; // Limpiamos el grid
-  
-  // Lógica de filtrado interna (para llamadas directas con filtro)
-  let propiedades = dataset;
-  if (filtro === 'alquiler_pisos') {
-      propiedades = dataset.filter(p => p.tipo === 'piso' && p.precio !== null);
-  } else if (filtro === 'venta') {
-      propiedades = dataset.filter(p => p.precio !== null);
-  } else if (filtro === 'destacados') {
-      propiedades = dataset.slice(0, 6);
+  // Si no se pasa dataset, intentamos usar el catálogo real unificado
+  if (!dataset) {
+    dataset = [...catalogoReal, ...propiedadesAlquiler, ...propiedadesVenta];
   }
 
-  // Aplicar límite si se especifica
+  // Eliminar duplicados por referencia
+  const uniqueDataset = [];
+  const seenRefs = new Set();
+  dataset.forEach(p => {
+    if (p.referencia && !seenRefs.has(p.referencia)) {
+      uniqueDataset.push(p);
+      seenRefs.add(p.referencia);
+    } else if (!p.referencia) {
+      uniqueDataset.push(p); // Por si acaso hay stubs sin ref
+    }
+  });
+  
+  dataset = uniqueDataset;
+
+  grid.innerHTML = ''; 
+  
+  let propiedades = dataset;
+  if (filtro === 'alquiler_pisos') {
+      propiedades = dataset.filter(p => p.tipo === 'piso' && p.precio !== null && p.operacion === 'alquiler');
+  } else if (filtro === 'venta') {
+      propiedades = dataset.filter(p => p.precio !== null && p.operacion === 'venta');
+  } else if (filtro === 'destacados') {
+      // Priorizamos los reales para los destacados
+      propiedades = dataset.sort((a, b) => (b.destacado ? 1 : 0) - (a.destacado ? 1 : 0)).slice(0, 6);
+  }
+
   if (limit) {
     propiedades = propiedades.slice(0, limit);
   }
 
-  // Si no hay resultados
   if (propiedades.length === 0) {
     grid.innerHTML = '<p style="color: var(--text-slate); text-align: center; grid-column: 1/-1;">No hay propiedades que coincidan con la búsqueda.</p>';
     return;
   }
 
-  // Pintamos las tarjetas
   propiedades.forEach(prop => {
-    // --- LÓGICA DE IA ---
-    const solar = prop.exterior ? Math.floor(Math.random() * 15) + 85 : Math.floor(Math.random() * 30) + 40;
-    const tranquility = prop.barrio === 'Ensanche' || prop.barrio === 'Hórreo' ? 55 : 85;
-    const services = prop.barrio === 'Ensanche' || prop.barrio === 'Hórreo' ? 98 : 70;
-
-    const imagenUrl = prop.imagen || "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80";
+    // Sanitize all external data before inserting into HTML
+    // Manejo de galería: tomamos solo la primera imagen para la tarjeta
+    let rawImg = prop.imagen_url || prop.imagen;
     
-    // Detectar si es alquiler para poner el /mes (buscando si tiene unidad_precio o el dataset es de alquiler)
-    const esAlquiler = prop.unidad_precio === 'mes' || (prop.precio < 5000 && prop.tipo !== 'garaje' && prop.tipo !== 'terreno');
+    // Limpieza defensiva
+    if (typeof rawImg === 'string') {
+      rawImg = rawImg.replace(/[\[\]"]/g, '').trim();
+      if (rawImg.includes(',')) {
+        rawImg = rawImg.split(',')[0].trim();
+      }
+    }
+
+    const imagenUrl = sanitizeURL(getPublicUrl(rawImg)) || "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80";
+    const titulo = escapeHTML(prop.titulo);
+    const referencia = escapeHTML(prop.referencia);
+    const tipo = escapeHTML(prop.tipo);
+    const habitaciones = escapeHTML(prop.habitaciones);
+    const banos = escapeHTML(prop.banos);
+    const superficieVal = prop.superficie_construida || prop.superficie || prop.m2;
+    const superficie = superficieVal ? escapeHTML(superficieVal.toString()) : '';
+
+    // Normalización de operación/alquiler
+    const esAlquiler = prop.operacion === 'alquiler' || prop.unidad_precio === 'mes';
+
+    // Whitelist estado to prevent class/content injection
+    const ESTADOS_VALIDOS = ['reservado', 'opcion_compra', 'disponible'];
+    const estado = ESTADOS_VALIDOS.includes(prop.estado) ? prop.estado : 'disponible';
+
+    const estadoBadge = estado === 'reservado'
+      ? '<span style="color: white; position: absolute; top: 10px; left: 10px; background: rgba(239, 68, 68, 0.9); padding: 6px 12px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">RESERVADO</span>'
+      : estado === 'opcion_compra'
+        ? '<span style="color: white; position: absolute; top: 10px; left: 10px; background: rgba(59, 130, 246, 0.9); padding: 6px 12px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">Venta o Alquiler</span>'
+        : '<span style="color: white; position: absolute; top: 10px; left: 10px; background: rgba(34, 197, 94, 0.9); padding: 6px 12px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">DISPONIBLE</span>';
 
     const cardHTML = `
-      <div class="glass-panel property-card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+      <a href="detalle.html?ref=${referencia}" class="glass-panel property-card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column; text-decoration: none; transition: transform 0.3s ease;">
         <div style="height: 240px; position: relative;">
-          <img src="${imagenUrl}" alt="${prop.titulo}" style="width: 100%; height: 100%; object-fit: cover;">
-          ${prop.estado === 'reservado' ? '<span style="color: white; position: absolute; top: 10px; left: 10px; background: rgba(239, 68, 68, 0.9); padding: 6px 12px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">RESERVADO</span>' : ''}
-          ${prop.estado === 'opcion_compra' ? '<span style="color: white; position: absolute; top: 10px; left: 10px; background: rgba(59, 130, 246, 0.9); padding: 6px 12px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">Venta o Alquiler</span>' : ''}
-          ${prop.estado === 'disponible' ? '<span style="color: white; position: absolute; top: 10px; left: 10px; background: rgba(34, 197, 94, 0.9); padding: 6px 12px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">DISPONIBLE</span>' : ''}
+          <img src="${imagenUrl}" alt="${titulo}" style="width: 100%; height: 100%; object-fit: cover;">
+          ${estadoBadge}
           <div style="position: absolute; right: 20px; bottom: 10px; width: 50px; height: 50px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); overflow: hidden;">
               <img src="./img/LOGO_BEST_HOUSE_RECTANGULAR.png" alt="Best House Logo" style="width: 100%; height: 100%; object-fit: contain; transform: scale(1.2);">
           </div>
@@ -68,54 +110,63 @@ export function renderProperties(filtro = 'todos', dataset = propiedadesAlquiler
             <h2 style="color: var(--brand-blue); font-size: 1.8rem; font-weight: 800; margin: 0;">
               ${prop.precio ? prop.precio.toLocaleString() + " €" + (esAlquiler ? "/mes" : "") : 'Consultar'}
             </h2>
-            <span style="color: #94a3b8; font-size: 0.8rem;">Ref. ${prop.referencia}</span>
+            <span style="color: #94a3b8; font-size: 0.8rem;">Ref. ${referencia}</span>
           </div>
-          <h3 style="color: var(--text-slate); font-size: 1.1rem; font-weight: 600; margin-bottom: 0.8rem; line-height: 1.4;">${prop.titulo}</h3>
+          <h3 style="color: var(--text-slate); font-size: 1.1rem; font-weight: 600; margin-bottom: 0.8rem; line-height: 1.4;">${titulo}</h3>
           <p style="color: #475569; font-size: 0.95rem; margin-bottom: 1rem; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
-            ${prop.habitaciones ? `<span><strong>${prop.habitaciones}</strong> habs.</span>` : ''}
-            ${prop.banos ? `<span><strong>${prop.banos}</strong> baños</span>` : ''}
-            ${prop.superficie_construida ? `<span><strong>${prop.superficie_construida}</strong> m²</span>` : ''}
-            <span style="text-transform: capitalize;">${prop.tipo}</span>
+            ${habitaciones ? `<span><strong>${habitaciones}</strong> habs.</span>` : ''}
+            ${banos ? `<span><strong>${banos}</strong> baños</span>` : ''}
+            ${superficie ? `<span><strong>${superficie}</strong> m²</span>` : ''}
+            <span style="text-transform: capitalize;">${tipo}</span>
           </p>
-          <div style="margin-top: auto; padding-top: 1rem; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
-            <div style="display: flex; gap: 0.5rem;">
-              <a href="tel:881123462" class="btn-card-secondary">Llamar</a>
-              <a href="mailto:santiago@best-house.com" class="btn-card-primary">Contactar</a>
-            </div>
+          <div style="margin-top: auto; padding-top: 1rem; border-top: 1px solid #e2e8f0; display: flex; justify-content: center;">
+             <span style="color: var(--brand-blue); font-weight: 700; font-size: 0.9rem;">Ver disponibilidad →</span>
           </div>
         </div>
-      </div>
+      </a>
     `;
     grid.innerHTML += cardHTML;
   });
 }
 
 // 2. Routing e Inicialización
-function init() {
+async function init() {
   const path = window.location.pathname;
   
+  // 1. Cargar datos reales de Supabase al inicio
+  try {
+    const data = await obtenerInmueblesAN8N();
+    catalogoReal = Array.isArray(data) ? data : [];
+    console.log(`[Supabase] Cargados ${catalogoReal.length} inmuebles reales.`);
+  } catch (err) {
+    console.warn('[Supabase] No se pudo conectar con el catálogo real. Usando fallbacks estáticos.', err);
+  }
+
   // Actualizar el título de la sección si existe en la página actual
   const h2 = document.querySelector('.properties-section h2');
 
   // Lógica para Alquiler.html
   if (path.includes('alquiler.html')) {
-    if (h2) h2.textContent = 'Catálogo Completo: Alquiler (21 Inmuebles)';
-    renderProperties('todos'); // Muestra los 21 por defecto en alquiler
-    setupFilters(propiedadesAlquiler);
+    const datasetAlquiler = [...catalogoReal.filter(p => p.operacion === 'alquiler'), ...propiedadesAlquiler];
+    if (h2) h2.textContent = `Catálogo Completo: Alquiler (${datasetAlquiler.length} Inmuebles)`;
+    renderProperties('todos', datasetAlquiler);
+    setupFilters(datasetAlquiler);
   } 
   // Lógica para Venta.html
   else if (path.includes('venta.html')) {
-    if (h2) h2.textContent = 'Catálogo Completo: Venta (44 Inmuebles)';
-    renderProperties('todos', propiedadesVenta);
-    setupFilters(propiedadesVenta);
+    const datasetVenta = [...catalogoReal.filter(p => p.operacion === 'venta'), ...propiedadesVenta];
+    if (h2) h2.textContent = `Catálogo Completo: Venta (${datasetVenta.length} Inmuebles)`;
+    renderProperties('todos', datasetVenta);
+    setupFilters(datasetVenta);
   }
   // Lógica para index.html (Home)
   else {
-    // Si estamos en la home, pintamos un mix de propiedades destacadas
     if (h2) h2.textContent = 'Últimas Novedades Inmobiliarias';
     const grid = document.querySelector('.property-grid');
     if (grid) { 
-      renderProperties('destacados', propiedadesAlquiler);
+      // Mostramos un mix destacado y reciente
+      const datasetMix = [...catalogoReal, ...propiedadesAlquiler];
+      renderProperties('destacados', datasetMix, 6);
     }
   }
 
@@ -130,9 +181,13 @@ function init() {
           const tipo = document.getElementById('tipo')?.value || '';
           
           console.log(`[N8N Tracker] Intención capturada: Búsqueda ejecutada (Operación: ${operacion}, Zona: ${zona})`);
+          enviarAN8N(`INTENT_TRACKING: Búsqueda de ${tipo} para ${operacion} en ${zona || 'toda la zona'}`);
           
           // Decide which dataset to filter
-          let datasetBase = (operacion === 'alquilar') ? propiedadesAlquiler : propiedadesVenta;
+          let datasetBase = (operacion === 'alquilar') 
+              ? [...catalogoReal.filter(p => p.operacion === 'alquiler'), ...propiedadesAlquiler] 
+              : [...catalogoReal.filter(p => p.operacion === 'venta'), ...propiedadesVenta];
+          
           let resultados = datasetBase;
 
           // Filter by city/zone
@@ -149,14 +204,11 @@ function init() {
              resultados = resultados.filter(p => p.tipo && p.tipo.toLowerCase().includes(tipo));
           }
           
-          // Get top 6
-          const top6 = resultados.slice(0, 6);
-          
           // Re-render the local grid using the global function
           const h2 = document.querySelector('.properties-section h2');
           if (h2) {
              const locationText = zonaRaw ? ` en ${zonaRaw}` : '';
-             h2.textContent = `Resultados: ${resultados.length} Inmuebles${locationText} para ${operacion === 'alquilar' ? 'alquilar' : 'comprar'}`;
+             h2.textContent = `${resultados.length} Resultado(s) encontrado(s)${locationText} para ${operacion === 'alquiler' ? 'alquilar' : 'comprar'}`;
           }
           
           renderProperties('custom', resultados, 6);
@@ -190,6 +242,24 @@ if (searchTabs.length > 0) {
       }
     });
   });
+  // --- LÓGICA: Menú Hamburguesa ---
+  const navToggle = document.querySelector('.nav-toggle');
+  const navLinks = document.querySelector('.nav-links');
+
+  if (navToggle && navLinks) {
+    navToggle.addEventListener('click', () => {
+      navToggle.classList.toggle('open');
+      navLinks.classList.toggle('open');
+    });
+
+    // Cerrar al hacer clic en un enlace
+    navLinks.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        navToggle.classList.remove('open');
+        navLinks.classList.remove('open');
+      });
+    });
+  }
 }
 
 // 3. Lógica de Filtros UI

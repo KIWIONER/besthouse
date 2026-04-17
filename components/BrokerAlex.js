@@ -1,3 +1,5 @@
+import { enviarAN8N } from '../services/api.js';
+
 class BrokerAlex extends HTMLElement {
   constructor() {
     super();
@@ -8,18 +10,101 @@ class BrokerAlex extends HTMLElement {
   connectedCallback() {
     this.render();
     this.setupListeners();
+    
+    // Si estamos en modo inline, abrimos el chat automáticamente
+    if (this.getAttribute('mode') === 'inline') {
+      this.shadowRoot.getElementById('chat').classList.add('open');
+    }
+  }
+
+  setContext(prop) {
+    this.propertyContext = prop;
+    const msgs = this.shadowRoot.getElementById('msgs');
+    if (msgs && prop) {
+      // Personalizar el primer mensaje si hay contexto
+      const firstMsg = msgs.querySelector('.alex');
+      if (firstMsg) {
+          const welcomeText = `¡Hola! Soy Alex. Veo que te interesa este ${prop.tipo} en ${prop.municipio} (Ref: ${prop.referencia}). ¿Te gustaría agendar una visita o tienes alguna duda específica sobre la zona?`;
+          firstMsg.innerHTML = this.parseMarkdown(welcomeText);
+      }
+    }
+  }
+
+  // Simple Markdown Parser (Bold & Italics)
+  parseMarkdown(text) {
+    if (!text) return '';
+    // Escapar HTML básico para seguridad (XSS)
+    let safeText = text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+
+    // Negritas: **texto** o __texto__
+    safeText = safeText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    safeText = safeText.replace(/__(.*?)__/g, '<strong>$1</strong>');
+    
+    // Cursivas: *texto* o _texto_
+    safeText = safeText.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    safeText = safeText.replace(/_(.*?)_/g, '<em>$1</em>');
+    
+    // Saltos de línea
+    safeText = safeText.replace(/\n/g, '<br>');
+
+    return safeText;
   }
 
   render() {
     this.shadowRoot.innerHTML = `
       <style>
         :host {
+          display: block;
+          font-family: 'Inter', sans-serif;
+        }
+
+        :host(:not([mode="inline"])) {
           position: fixed;
           bottom: 24px;
           right: 24px;
           z-index: 1000;
-          font-family: 'Inter', sans-serif;
         }
+
+        :host([mode="inline"]) .fab {
+            display: none;
+        }
+
+        :host([mode="inline"]) .chat-window {
+            position: relative;
+            bottom: 0;
+            right: 0;
+            width: 100%;
+            height: 450px;
+            box-shadow: none;
+            border: none;
+            background: transparent;
+        }
+
+        :host([mode="inline"]) .msg.alex {
+            background: rgba(0, 0, 130, 0.05);
+            color: #1e293b;
+        }
+
+        :host([mode="inline"]) .msg.user {
+            background: rgba(251, 191, 36, 0.1);
+            color: #b45309;
+        }
+
+        :host([mode="inline"]) input {
+            background: #fff;
+            border-color: #e2e8f0;
+            color: #1e293b;
+        }
+
+        :host([mode="inline"]) .header-info h4 { color: #000082; }
+        :host([mode="inline"]) .header-info p { color: #64748b; }
+        :host([mode="inline"]) .header { border-bottom: 1px solid #f1f5f9; }
+        :host([mode="inline"]) .input-area { border-top: 1px solid #f1f5f9; }
 
         .fab {
           width: 60px;
@@ -195,7 +280,7 @@ class BrokerAlex extends HTMLElement {
       }
     });
 
-    const sendMessage = () => {
+    const sendMessage = async () => {
       const text = input.value.trim();
       if (!text) return;
 
@@ -205,15 +290,51 @@ class BrokerAlex extends HTMLElement {
       uMsg.textContent = text;
       msgs.appendChild(uMsg);
       input.value = '';
+      
+      // Auto-scroll
+      msgs.scrollTop = msgs.scrollHeight;
 
-      // Mock AI response
-      setTimeout(() => {
+      // Add loading state
+      const loadingMsg = document.createElement('div');
+      loadingMsg.className = 'msg alex';
+      loadingMsg.textContent = "Alex está analizando tu petición...";
+      loadingMsg.style.fontStyle = 'italic';
+      loadingMsg.style.opacity = '0.7';
+      msgs.appendChild(loadingMsg);
+      msgs.scrollTop = msgs.scrollHeight;
+
+      try {
+        // Unificar sesión con api.js
+        const payload = {
+            mensaje: text,
+            // sessionId omitido para que api.js use bh_chat_session_id de sessionStorage
+            referencia: this.propertyContext?.referencia || null
+        };
+
+        const responseData = await enviarAN8N(payload);
+        
+        // El sessionId ya lo gestiona api.js en sessionStorage
+
+        // Remove loading message
+        if (msgs.contains(loadingMsg)) msgs.removeChild(loadingMsg);
+
         const aMsg = document.createElement('div');
         aMsg.className = 'msg alex';
-        aMsg.textContent = "Excelente criterio. Analizaré la incidencia solar, rentabilidad estimada por zona y te mostraré opciones de alta gama. Conectando con N8N...";
+        
+        // Handle different possible response formats
+        const replyText = responseData.output || responseData.text || responseData.response || 
+                         (typeof responseData === 'string' ? responseData : "He recibido tu información, estoy procesándola.");
+        
+        // Renderizado con soporte para Markdown básico (negritas y cursivas)
+        aMsg.innerHTML = this.parseMarkdown(replyText);
         msgs.appendChild(aMsg);
-        msgs.scrollTop = msgs.scrollHeight;
-      }, 1000);
+      } catch (error) {
+        if (msgs.contains(loadingMsg)) msgs.removeChild(loadingMsg);
+        const eMsg = document.createElement('div');
+        eMsg.className = 'msg alex';
+        eMsg.textContent = "Lo siento, ha ocurrido un error al conectar con el servidor.";
+        msgs.appendChild(eMsg);
+      }
       
       msgs.scrollTop = msgs.scrollHeight;
     };
